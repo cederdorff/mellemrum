@@ -2,6 +2,8 @@
 
 Mellemrum er en React-prototype for en lokal kultur- og eventplatform. Projektet er startpunktet for Case 1 i Product Optimization.
 
+Den primære målgruppe er personer, der ønsker en enkel vej til at opdage og tilmelde sig lokale kulturoplevelser i Aarhus. Arrangører er en sekundær målgruppe, som bruger platformen til at dele events og få overblik over tilmeldinger.
+
 Guiden hjælper dig med at få React-projektet til at køre lokalt og forbinde det til dit eget Supabase-projekt. Du behøver ikke kunne skrive SQL for at følge opsætningen.
 
 [Se den udleverede løsning online](https://cederdorff.com/mellemrum/), hvis du vil udforske prototypen, før du sætter projektet op lokalt.
@@ -39,6 +41,8 @@ Gå derefter til **SQL Editor** i Supabase:
 Hvis Supabase viser advarslen på billedet nedenfor, skal du vælge **Run without RLS** for denne starter.
 
 ![Supabase-advarsel med knappen Run without RLS](docs/images/setup/run-without-rls.webp)
+
+Det er et bevidst scopevalg i Case 1: Authentication og authorization indgår ikke, og den interne side skal derfor ikke adgangsbeskyttes. Brug kun de udleverede eller andre fiktive testdata – aldrig rigtige personoplysninger.
 
 SQL-filen opretter tabellerne `events` og `registrations` og indsætter de startdata, som appen forventer. Vent, til Supabase viser, at din query er gennemført.
 
