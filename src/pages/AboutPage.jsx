@@ -21,10 +21,10 @@ export default function AboutPage() {
               Mellemrum samler koncerter, talks, workshops og fællesskaber, så du lettere kan opdage noget, du ikke
               allerede kendte.
             </p>
-            <p>
+            <p1>
               Vi gør det lokale kulturliv mere overskueligt og skaber en kort vej fra nysgerrighed til en plads i
               kalenderen.
-            </p>
+            </p1>
           </div>
         </section>
 
@@ -58,17 +58,17 @@ export default function AboutPage() {
             <li>
               <span>01</span>
               <strong>Arrangører deler events</strong>
-              <p>Oplevelsen får en tydelig plads på platformen.</p>
+              <p1>Oplevelsen får en tydelig plads på platformen.</p1>
             </li>
             <li>
               <span>02</span>
               <strong>Brugere opdager</strong>
-              <p>Søgning, kategorier og kuratering gør det lettere at vælge.</p>
+              <p1>Søgning, kategorier og kuratering gør det lettere at vælge.</p1>
             </li>
             <li>
               <span>03</span>
               <strong>Brugere tilmelder sig</strong>
-              <p>Fra interesse til tilmelding i ét sammenhængende flow.</p>
+              <p1>Fra interesse til tilmelding i ét sammenhængende flow.</p1>
             </li>
           </ol>
         </section>
@@ -84,7 +84,7 @@ export default function AboutPage() {
           <div>
             <p className="eyebrow dark">Aarhus tæt på</p>
             <h2 id="about-city-title">Find plads til noget nyt.</h2>
-            <p>Mellemrum peger på steder, idéer og fællesskaber på tværs af byen — fra små scener til store tanker.</p>
+            <p1>Mellemrum peger på steder, idéer og fællesskaber på tværs af byen — fra små scener til store tanker.</p1>
             <Link className="about-cta" to="/">
               Se kommende events →
             </Link>
