@@ -14,6 +14,9 @@ export default function EventPage() {
   const [event, setEvent] = useState(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  
 
   useEffect(() => {
     async function getEvent() {
@@ -25,13 +28,77 @@ export default function EventPage() {
     getEvent();
   }, [eventId]);
 
-  async function handleSubmit(eventSubmit) {
-    eventSubmit.preventDefault();
-    console.log({ name, email, event: event.title });
+ async function handleSubmit(eventSubmit) {
+  eventSubmit.preventDefault();
+
+  setSubmitError("");
+
+  const response = await fetch(
+    `${SUPABASE_URL}/event_registrations`,
+    {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        event_id: event.id,
+        name: name,
+        email: email
+      })
+    }
+  );
+
+  if (!response.ok) {
+    setSubmitError("Der skete en fejl. Prøv venligst igen.");
+    return;
   }
 
+  setName("");
+  setEmail("");
+  setSubmitted(true);
+
+
+   // Find eventet i tilmeldingsoversigten
+   const overviewResponse = await fetch(
+     `${SUPABASE_URL}/registrations?eventTitle=eq.${encodeURIComponent(event.title)}`,
+     { headers },
+   );
+
+   const overviewData = await overviewResponse.json();
+   const overviewEvent = overviewData[0];
+
+   if (overviewEvent) {
+     const currentRegistered = parseInt(overviewEvent.tilmeldte, 10);
+
+     const totalMatch = overviewEvent.tilmeldte.match(/ud af\s+(\d+)/);
+     const totalSpots = totalMatch ? parseInt(totalMatch[1], 10) : 0;
+
+     const currentRemaining = parseInt(overviewEvent.ledigePladser, 10);
+
+     await fetch(`${SUPABASE_URL}/registrations?id=eq.${overviewEvent.id}`, {
+       method: "PATCH",
+       headers,
+       body: JSON.stringify({
+         tilmeldte: `${currentRegistered + 1} ud af ${totalSpots}`,
+         ledigePladser: `${Math.max(currentRemaining - 1, 0)} tilbage`,
+       }),
+     });
+   }
+
+   // Husk at brugeren har tilmeldt sig dette event
+   localStorage.setItem(`tilmeldt-${event.title}`, "true");
+
+   // Ryd formularen
+   setName("");
+   setEmail("");
+
+   setSubmitted(true);
+
+   setName("");
+   setEmail("");
+   setSubmitted(true);
+ }
+
   if (!event) {
-    return null;
+    return <p>Indlæser event...</p>;
   }
 
   const date = new Date(event.date);
@@ -52,15 +119,24 @@ export default function EventPage() {
             <div className="detail-list">
               <p>
                 <strong>Dato</strong>
-                {date.toLocaleDateString("da-DK", { weekday: "long", day: "numeric", month: "long" })} kl.{" "}
-                {date.toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" })}
+                {date.toLocaleDateString("da-DK", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                })}{" "}
+                kl.{" "}
+                {date.toLocaleTimeString("da-DK", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
               </p>
               <p>
                 <strong>Sted</strong>
                 <span>
                   {event.venueName}
                   <br />
-                  {event.venueAddress}, {event.venuePostalCode} {event.venueCity}
+                  {event.venueAddress}, {event.venuePostalCode}{" "}
+                  {event.venueCity}
                   {event.venueWebsite && (
                     <>
                       <br />
@@ -79,28 +155,59 @@ export default function EventPage() {
         </section>
 
         <section className="signup-panel">
-          <div>
-            <p className="eyebrow dark">Tilmelding</p>
-            <h2>Reserver din plads</h2>
-            <p>Udfyld formularen, så sender vi din tilmelding til arrangøren.</p>
-          </div>
+          {submitted ? (
+            <div className="signup-success">
+              <p className="eyebrow dark">Tilmeldt</p>
 
-          <form onSubmit={handleSubmit}>
-            <label>
-              Navn
-              <input value={name} onChange={(inputEvent) => setName(inputEvent.target.value)} />
-            </label>
-            <span>E-mail</span>
-            <input
-              value={email}
-              onChange={(inputEvent) => setEmail(inputEvent.target.value)}
-              placeholder="dig@example.com"
-            />
-            <button type="submit">Tilmeld mig</button>
-          </form>
+              <h2>Tak for din tilmelding!</h2>
+
+              <p>Du vil få en mail fra arrangøren.</p>
+
+              <Link className="signup-success-link" to="/tilmeldinger">
+                Se tilmeldinger
+              </Link>
+            </div>
+          ) : (
+            <>
+              <div>
+                <p className="eyebrow dark">Tilmelding</p>
+
+                <h2>Reserver din plads</h2>
+
+                <p>
+                  Udfyld formularen, så sender vi din tilmelding til arrangøren.
+                </p>
+              </div>
+
+              <form onSubmit={handleSubmit}>
+                <label>
+                  Navn
+                  <input
+                    value={name}
+                    onChange={(inputEvent) => setName(inputEvent.target.value)}
+                    required
+                  />
+                </label>
+
+                <label>
+                  E-mail
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(inputEvent) => setEmail(inputEvent.target.value)}
+                    placeholder="dig@example.com"
+                    required
+                  />
+                </label>
+
+                <button type="submit">Tilmeld mig</button>
+
+                {submitError && <p className="form-error">{submitError}</p>}
+              </form>
+            </>
+          )}
         </section>
       </main>
-      
     </>
   );
 }
