@@ -50,7 +50,8 @@ export default function HomePage() {
         <p className="eyebrow">Kultur i Aarhus</p>
         <h1>Find plads til noget nyt.</h1>
         <p className="hero-copy">
-          Koncerter, talks og workshops samlet ét sted. Find dit næste event, og tilmeld dig på få minutter.
+          Koncerter, talks og workshops samlet ét sted. Find dit næste event, og
+          tilmeld dig på få minutter.
         </p>
         <a className="hero-link" href="#events">
           Se kommende events ↓
@@ -76,9 +77,13 @@ export default function HomePage() {
               placeholder="Søg efter titel eller sted"
             />
           </label>
+
           <label>
             Kategori
-            <select value={category} onChange={(event) => setCategory(event.target.value)}>
+            <select
+              value={category}
+              onChange={(event) => setCategory(event.target.value)}
+            >
               {categories.map((item) => (
                 <option key={item}>{item}</option>
               ))}
@@ -86,28 +91,42 @@ export default function HomePage() {
           </label>
         </section>
 
-        <section className="event-grid">
-          {filteredEvents.map((event) => (
-            <article className="event-card" key={event.id}>
-              <img src={event.image} alt="" />
-              <div className="event-card-content">
-                <p className="event-category">{event.category}</p>
-                <h3>{event.title}</h3>
-                <p>{event.summary}</p>
-                <div className="event-meta">
-                  <span>{formatEventDate(event.date)}</span>
-                  <span>{event.venueName}</span>
+        {filteredEvents.length === 0 ? (
+          <section className="no-results">
+            <h3>Ingen events fundet</h3>
+
+            <p>
+              Vi kunne ikke finde nogen events, der matcher din søgning. Prøv et
+              andet søgeord eller en anden kategori.
+            </p>
+          </section>
+        ) : (
+          <section className="event-grid">
+            {filteredEvents.map((event) => (
+              <article className="event-card" key={event.id}>
+                <img src={event.image} alt="" />
+
+                <div className="event-card-content">
+                  <p className="event-category">{event.category}</p>
+
+                  <h3>{event.title}</h3>
+
+                  <p>{event.summary}</p>
+
+                  <div className="event-meta">
+                    <span>{formatEventDate(event.date)}</span>
+                    <span>{event.venueName}</span>
+                  </div>
+
+                  <Link className="card-link" to={`/events/${event.id}`}>
+                    Læs mere
+                  </Link>
                 </div>
-                <Link className="card-link" to={`/events/${event.id}`}>
-                  Læs mere
-                </Link>
-              </div>
-            </article>
-          ))}
-        </section>
+              </article>
+            ))}
+          </section>
+        )}
       </main>
-     
     </>
   );
 }
-
