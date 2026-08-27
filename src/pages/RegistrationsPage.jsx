@@ -2,56 +2,95 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import "./RegistrationsPage.css";
 
+
+
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+
 const headers = {
   apikey: import.meta.env.VITE_SUPABASE_APIKEY,
-  "Content-Type": "application/json"
+  "Content-Type": "application/json",
 };
 
 export default function RegistrationsPage() {
-  const [registrations, setRegistrations] = useState([]);
-  const [registrationCount, setRegistrationCount] = useState(0);
+  const [events, setEvents] = useState([]);
 
   useEffect(() => {
     async function getRegistrations() {
-      const response = await fetch(`${SUPABASE_URL}/registrations?order=createdAt.desc`, { headers });
+      const response = await fetch(
+        `${SUPABASE_URL}/registrations?order=eventDate.asc`,
+        { headers },
+      );
+
       const data = await response.json();
-      setRegistrations(data);
-      setRegistrationCount(data.length);
+      setEvents(data);
     }
 
     getRegistrations();
   }, []);
 
+  function formatEventDate(eventDate) {
+    const date = new Date(eventDate);
+
+    return date.toLocaleDateString("da-DK", {
+      day: "numeric",
+      month: "numeric",
+      year: "numeric",
+    });
+  }
+
   return (
     <>
       <header className="admin-header">
-        <p className="eyebrow">Internt overblik</p>
+        <p className="eyebrow">Event overblik</p>
         <h1>Tilmeldinger</h1>
-        <p>{registrationCount} tilmeldinger i alt</p>
+        <p>Overblik over tilmeldinger og ledige pladser</p>
       </header>
-      <main>
-        <div className="registration-list">
+
+      <main className="registrations-page">
+        <section className="registration-list">
           <div className="registration-row registration-labels">
-            <span>Navn</span>
             <span>Event</span>
+            <span>Sted</span>
             <span>Dato</span>
-            <span>Status</span>
+            <span>Tilmeldte</span>
+            <span>Ledige pladser</span>
           </div>
-          {registrations.map((registration) => (
-            <div className="registration-row" key={registration.id}>
-              <div>
-                <strong>{registration.name}</strong>
-                <small>{registration.email}</small>
+
+          {events.map((event) => {
+            const remainingSpots = parseInt(event.ledigePladser, 10);
+            const hasAvailableSpots = remainingSpots > 0;
+
+            return (
+              <div className="registration-row" key={event.id}>
+                <strong>{event.eventTitle}</strong>
+
+                <span>{event.eventLocation}</span>
+
+                <span>{formatEventDate(event.eventDate)}</span>
+
+                <span>{event.tilmeldte}</span>
+
+                <span
+                  className={`status ${hasAvailableSpots ? "available-status" : "sold-out-status"}`}
+                >
+                  {event.ledigePladser}
+                </span>
+
+                {hasAvailableSpots ? (
+                  <Link
+                    className="registration-button available"
+                    to={`/events/${event.id}`}
+                  >
+                    Tilmeld
+                  </Link>
+                ) : (
+                  <span className="registration-button sold-out">Udsolgt</span>
+                )}
               </div>
-              <span>{registration.eventTitle}</span>
-              <span>{new Date(registration.eventDate).toLocaleDateString("da-DK")}</span>
-              <span className="status">{registration.status}</span>
-            </div>
-          ))}
-        </div>
+            );
+          })}
+        </section>
       </main>
-      
     </>
   );
 }
