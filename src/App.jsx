@@ -8,11 +8,14 @@ import AboutPage from "./pages/AboutPage";
 import EventPage from "./pages/EventPage";
 import RegistrationsPage from "./pages/RegistrationsPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import ScrollToTop from "./components/ScrollToTop";
 
 
 export default function App() {
   return (
     <>
+    <ScrollToTop />
+    
       <Navbar />
       <Routes>
         <Route path="/" element={<HomePage />} />
