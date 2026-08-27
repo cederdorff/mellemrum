@@ -107,7 +107,7 @@ export default function AboutPage() {
           <div>
             <p className="eyebrow dark">Aarhus tæt på</p>
             <h2 id="about-city-title">Find plads til noget nyt.</h2>
-            <p>
+            <p className="about-lead-text">
               Mellemrum peger på steder, idéer og fællesskaber på tværs af byen
               — fra små scener til store tanker.
             </p>
@@ -117,7 +117,6 @@ export default function AboutPage() {
           </div>
         </section>
       </main>
-     
     </>
   );
 }
