@@ -25,37 +25,63 @@ export default function HomePage() {
 
   const categories = ["Alle", ...new Set(events.map((event) => event.category))];
 
-  const filteredEvents = events.filter((event) => {
-    const searchText = `${event.title} ${event.summary} ${event.venueName}`.toLowerCase();
-    const matchesSearch = searchText.includes(search.toLowerCase());
-    const matchesCategory = category === "Alle" || event.category === category;
+const filteredEvents = events.filter((event) => {
+  const searchText =
+    `${event.title} ${event.summary} ${event.venueName}`.toLowerCase();
+  const matchesSearch = searchText.includes(search.toLowerCase());
+  const matchesCategory = category === "Alle" || event.category === category;
 
-    return matchesSearch && matchesCategory;
+  return matchesSearch && matchesCategory;
+});
+
+function getImageSize(imageUrl, width) {
+  const url = new URL(imageUrl);
+
+  url.searchParams.set("w", width);
+  url.searchParams.set("q", "70");
+  url.searchParams.set("auto", "format");
+
+  return url.toString();
+}
+
+function formatEventDate(eventDate) {
+  const date = new Date(eventDate);
+
+  const formattedDate = date.toLocaleDateString("da-DK", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
   });
 
-  function formatEventDate(eventDate) {
-    const date = new Date(eventDate);
-    const formattedDate = date.toLocaleDateString("da-DK", {
-      weekday: "long",
-      day: "numeric",
-      month: "long"
-    });
-
-    return formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-  }
+  return formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+}
 
   return (
     <>
       <header className="hero">
-        <p className="eyebrow">Kultur i Aarhus</p>
-        <h1>Find plads til noget nyt.</h1>
-        <p className="hero-copy">
-          Koncerter, talks og workshops samlet ét sted. Find dit næste event, og
-          tilmeld dig på få minutter.
-        </p>
-        <a className="hero-link" href="#events">
-          Se kommende events ↓
-        </a>
+        <img
+          className="hero-image"
+          src="/hero.webP"
+          alt=""
+          fetchPriority="high"
+        />
+
+        <div className="hero-overlay"></div>
+
+        <div className="hero-content">
+          <p className="eyebrow">Kultur i Aarhus</p>
+
+          <h1>Find plads til noget nyt.</h1>
+
+          <p className="hero-copy">
+            Koncerter, talks og workshops samlet ét sted. Find dit næste event,
+            og tilmeld dig på få minutter.
+          </p>
+
+          <a className="hero-link" href="#events">
+            Se kommende events ↓
+          </a>
+        </div>
       </header>
 
       <main id="events">
@@ -71,6 +97,8 @@ export default function HomePage() {
           <label>
             Søg
             <input
+              id="event-search"
+              name="event-search"
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
@@ -81,6 +109,8 @@ export default function HomePage() {
           <label>
             Kategori
             <select
+              id="event-category"
+              name="event-category"
               value={category}
               onChange={(event) => setCategory(event.target.value)}
             >
@@ -104,7 +134,17 @@ export default function HomePage() {
           <section className="event-grid">
             {filteredEvents.map((event) => (
               <article className="event-card" key={event.id}>
-                <img src={event.image} alt="" />
+                <img
+                  src={getImageSize(event.image, 800)}
+                  srcSet={`
+                  ${getImageSize(event.image, 500)} 500w,
+                  ${getImageSize(event.image, 800)} 800w,
+                  ${getImageSize(event.image, 1200)} 1200w
+                  `}
+                  sizes="(max-width: 620px) 100vw, (max-width: 900px) 50vw, 33vw"
+                  alt={event.title}
+                  loading="lazy"
+                />
 
                 <div className="event-card-content">
                   <p className="event-category">{event.category}</p>
