@@ -34,15 +34,6 @@ const filteredEvents = events.filter((event) => {
   return matchesSearch && matchesCategory;
 });
 
-function getImageSize(imageUrl, width) {
-  const url = new URL(imageUrl);
-
-  url.searchParams.set("w", width);
-  url.searchParams.set("q", "70");
-  url.searchParams.set("auto", "format");
-
-  return url.toString();
-}
 
 function formatEventDate(eventDate) {
   const date = new Date(eventDate);
@@ -61,7 +52,7 @@ function formatEventDate(eventDate) {
       <header className="hero">
         <img
           className="hero-image"
-          src="/hero.webP"
+          src="/hero.webp"
           alt=""
           fetchPriority="high"
         />
@@ -134,17 +125,7 @@ function formatEventDate(eventDate) {
           <section className="event-grid">
             {filteredEvents.map((event) => (
               <article className="event-card" key={event.id}>
-                <img
-                  src={getImageSize(event.image, 800)}
-                  srcSet={`
-                  ${getImageSize(event.image, 500)} 500w,
-                  ${getImageSize(event.image, 800)} 800w,
-                  ${getImageSize(event.image, 1200)} 1200w
-                  `}
-                  sizes="(max-width: 620px) 100vw, (max-width: 900px) 50vw, 33vw"
-                  alt={event.title}
-                  loading="lazy"
-                />
+                <img src={event.image} alt={event.title} loading="lazy" />
 
                 <div className="event-card-content">
                   <p className="event-category">{event.category}</p>
