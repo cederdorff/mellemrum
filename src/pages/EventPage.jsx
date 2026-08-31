@@ -19,7 +19,7 @@ export default function EventPage() {
   const [submitError, setSubmitError] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  // Hent det valgte event
+  // HENT DET VALGTE EVENT
   useEffect(() => {
     async function getEvent() {
       setLoading(true);
@@ -43,14 +43,14 @@ export default function EventPage() {
     getEvent();
   }, [eventId]);
 
-  // Skift browserens titel
+  // SKIFT TITEL I BROWSERFANEN
   useEffect(() => {
     if (event) {
       document.title = `${event.title} | Mellemrum`;
     }
   }, [event]);
 
-  // Tjek om den loggede bruger allerede er tilmeldt
+  // TJEK OM BRUGEREN ALLEREDE ER TILMELDT
   useEffect(() => {
     async function checkRegistration() {
       if (!user || !eventId) {
@@ -76,32 +76,35 @@ export default function EventPage() {
     checkRegistration();
   }, [user, eventId]);
 
-  // Tilmeld den loggede bruger
-async function handleRegistration() {
-  if (!user) {
-    return;
-  }
+  // TILMELD BRUGEREN
+  async function handleRegistration() {
+    if (!user) {
+      return;
+    }
 
-  setRegistering(true);
-  setSubmitError("");
+    setRegistering(true);
+    setSubmitError("");
 
-  const { error } = await supabase.from("event_registrations").insert({
-    event_id: event.id,
-    user_id: user.id,
-  });
+    const { error } = await supabase.from("event_registrations").insert({
+      event_id: event.id,
+      user_id: user.id,
+    });
 
-  if (error) {
-    console.error("Fejl ved tilmelding:", error);
-    setSubmitError("Der skete en fejl ved tilmeldingen.");
+    if (error) {
+      console.error("Fejl ved tilmelding:", error);
+
+      setSubmitError("Der skete en fejl ved tilmeldingen. Prøv venligst igen.");
+
+      setRegistering(false);
+      return;
+    }
+
+    setIsRegistered(true);
+    setSubmitted(true);
     setRegistering(false);
-    return;
   }
 
-  setIsRegistered(true);
-  setSubmitted(true);
-  setRegistering(false);
-}
-
+  // LOADING
   if (loading) {
     return (
       <main className="event-page">
@@ -110,6 +113,7 @@ async function handleRegistration() {
     );
   }
 
+  // EVENT FINDES IKKE
   if (!event) {
     return (
       <main className="event-page">
@@ -135,13 +139,14 @@ async function handleRegistration() {
         <img src={event.image} alt={event.title} />
 
         <div className="event-detail-content">
-          <p className="event-category">{event.category}</p>
+          {event.category && <p className="event-category">{event.category}</p>}
 
           <h1>{event.title}</h1>
 
-          <p className="lead">{event.summary}</p>
+          {event.summary && <p className="lead">{event.summary}</p>}
 
           <div className="detail-list">
+            {/* DATO */}
             <p>
               <strong>Dato</strong>
 
@@ -159,13 +164,31 @@ async function handleRegistration() {
               </span>
             </p>
 
+            {/* STED */}
             <p>
               <strong>Sted</strong>
 
               <span>
                 {event.venueName}
-                <br />
-                {event.venueAddress}, {event.venuePostalCode} {event.venueCity}
+
+                {(event.venueAddress ||
+                  event.venuePostalCode ||
+                  event.venueCity) && (
+                  <>
+                    <br />
+
+                    {event.venueAddress}
+
+                    {event.venueAddress && event.venuePostalCode && ", "}
+
+                    {event.venuePostalCode}
+
+                    {event.venuePostalCode && event.venueCity && " "}
+
+                    {event.venueCity}
+                  </>
+                )}
+
                 {event.venueWebsite && (
                   <>
                     <br />
@@ -182,14 +205,17 @@ async function handleRegistration() {
               </span>
             </p>
 
+            {/* PRIS */}
             <p>
               <strong>Pris</strong>
 
-              <span>{event.price === 0 ? "Gratis" : `${event.price} kr.`}</span>
+              <span>
+                {Number(event.price) === 0 ? "Gratis" : `${event.price} kr.`}
+              </span>
             </p>
           </div>
 
-          <p>{event.description}</p>
+          {event.description && <p>{event.description}</p>}
         </div>
       </section>
 
@@ -209,7 +235,7 @@ async function handleRegistration() {
             </Link>
           </div>
         ) : !user ? (
-          /* BRUGEREN ER IKKE LOGGET IND */
+          /* IKKE LOGGET IND */
           <>
             <div>
               <p className="eyebrow dark">Tilmelding</p>
@@ -228,7 +254,7 @@ async function handleRegistration() {
             </div>
           </>
         ) : isRegistered ? (
-          /* BRUGEREN VAR ALLEREDE TILMELDT */
+          /* ALLEREDE TILMELDT */
           <div className="signup-success">
             <p className="eyebrow dark">Tilmeldt</p>
 
