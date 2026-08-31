@@ -80,3 +80,14 @@
   margin: 0.5rem 0 0;
   padding: 0.8rem 1rem;
 }
+
+.forgot-password-link {
+  color: var(--green);
+  font-weight: 700;
+  justify-self: start;
+  text-underline-offset: 0.25rem;
+}
+
+.forgot-password-link:hover {
+  opacity: 0.7;
+}

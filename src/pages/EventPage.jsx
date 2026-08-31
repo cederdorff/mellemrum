@@ -143,6 +143,15 @@ export default function EventPage() {
 
           <h1>{event.title}</h1>
 
+          {user && event.created_by === user.id && (
+            <Link
+              className="edit-event-link"
+              to={`/events/${event.id}/rediger`}
+            >
+              Rediger event
+            </Link>
+          )}
+
           {event.summary && <p className="lead">{event.summary}</p>}
 
           <div className="detail-list">

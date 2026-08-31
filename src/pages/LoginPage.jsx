@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
+
 import { supabase } from "../lib/supabase";
+
 import "./LoginPage.css";
 
 export default function LoginPage() {
@@ -11,6 +13,7 @@ export default function LoginPage() {
 
   const navigate = useNavigate();
 
+  // LOG IND
   async function handleLogin(event) {
     event.preventDefault();
 
@@ -24,27 +27,36 @@ export default function LoginPage() {
 
     if (error) {
       console.error("Login-fejl:", error);
+
       setMessage("E-mail eller adgangskode er forkert.");
+
       setLoading(false);
       return;
     }
 
     setLoading(false);
+
+    // Send brugeren til profilen
     navigate("/profil");
   }
 
+  // OPRET BRUGER
   async function handleSignUp() {
     setLoading(true);
     setMessage("");
 
+    // Tjek at begge felter er udfyldt
     if (!email || !password) {
       setMessage("Indtast både e-mail og adgangskode.");
+
       setLoading(false);
       return;
     }
 
+    // Minimumslængde på adgangskode
     if (password.length < 6) {
       setMessage("Adgangskoden skal være mindst 6 tegn.");
+
       setLoading(false);
       return;
     }
@@ -56,21 +68,26 @@ export default function LoginPage() {
 
     if (error) {
       console.error("Fejl ved oprettelse:", error);
+
       setMessage(error.message);
+
       setLoading(false);
       return;
     }
 
     setLoading(false);
 
+    // Hvis mailbekræftelse er slået fra i Supabase,
+    // bliver brugeren automatisk logget ind.
     if (data.session) {
-      setMessage("Din bruger er oprettet!");
       navigate("/profil");
-    } else {
-      setMessage(
-        "Din bruger er oprettet. Tjek din e-mail for at bekræfte din konto.",
-      );
+      return;
     }
+
+    // Fallback hvis mailbekræftelse stadig er slået til
+    setMessage(
+      "Din bruger er oprettet. Tjek din e-mail for at bekræfte din konto.",
+    );
   }
 
   return (
@@ -78,6 +95,7 @@ export default function LoginPage() {
       <h1>Log ind</h1>
 
       <form onSubmit={handleLogin}>
+        {/* E-MAIL */}
         <label>
           E-mail
           <input
@@ -86,10 +104,12 @@ export default function LoginPage() {
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
+            autoComplete="email"
             required
           />
         </label>
 
+        {/* ADGANGSKODE */}
         <label>
           Adgangskode
           <input
@@ -98,18 +118,28 @@ export default function LoginPage() {
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
+            autoComplete="current-password"
+            minLength="6"
             required
           />
         </label>
 
+        {/* GLEMT ADGANGSKODE */}
+        <Link className="forgot-password-link" to="/glemt-adgangskode">
+          Glemt adgangskode?
+        </Link>
+
+        {/* LOG IND */}
         <button type="submit" disabled={loading}>
           {loading ? "Arbejder..." : "Log ind"}
         </button>
 
+        {/* OPRET BRUGER */}
         <button type="button" onClick={handleSignUp} disabled={loading}>
-          Opret bruger
+          {loading ? "Arbejder..." : "Opret bruger"}
         </button>
 
+        {/* BESKED */}
         {message && <p className="login-message">{message}</p>}
       </form>
     </main>

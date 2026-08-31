@@ -115,3 +115,30 @@
     grid-template-columns: 1fr;
   }
 }
+
+.create-event-form input,
+.create-event-form textarea,
+.create-event-form select {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--ink);
+  padding: 0.85rem 1rem;
+  width: 100%;
+}
+
+.create-event-form textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+.delete-event-button {
+  background: #f3cccc !important;
+  color: #8a2525 !important;
+  border: 2px solid #8a2525 !important;
+}
+
+.delete-event-button:hover {
+  background: #8a2525 !important;
+  color: white !important;
+}

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-
+import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
+
 import "./CreateEventPage.css";
 
 export default function CreateEventPage() {
@@ -11,8 +12,11 @@ export default function CreateEventPage() {
   const [date, setDate] = useState("");
   const [venueName, setVenueName] = useState("");
   const [price, setPrice] = useState("");
+  const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
+const { user } = useAuth();
 
+const [capacity, setCapacity] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -22,19 +26,17 @@ export default function CreateEventPage() {
     setLoading(true);
     setErrorMessage("");
 
-    // Tjek at der er valgt et billede
     if (!image) {
       setErrorMessage("Du skal vælge et billede.");
       setLoading(false);
       return;
     }
 
-    // Lav et unikt filnavn til billedet
+    // Lav unikt filnavn til billedet
     const fileExtension = image.name.split(".").pop();
-
     const fileName = `${crypto.randomUUID()}.${fileExtension}`;
 
-    // 1. Upload billedet til Supabase Storage
+    // 1. Upload billede til Supabase Storage
     const { error: uploadError } = await supabase.storage
       .from("event-images")
       .upload(fileName, image);
@@ -55,15 +57,18 @@ export default function CreateEventPage() {
 
     const imageUrl = imageData.publicUrl;
 
-    // 3. Opret eventet i Supabase
+    // 3. Opret event i Supabase
     const { data: newEvent, error: eventError } = await supabase
       .from("events")
       .insert({
-        title: title,
-        date: date,
-        venueName: venueName,
+        title,
+        date,
+        venueName,
         price: Number(price),
+        description,
         image: imageUrl,
+        capacity: Number(capacity),
+        created_by: user.id,
       })
       .select()
       .single();
@@ -77,7 +82,9 @@ export default function CreateEventPage() {
       return;
     }
 
-    // 4. Send brugeren til det nye event
+    setLoading(false);
+
+    // Gå direkte til det nye event
     navigate(`/events/${newEvent.id}`);
   }
 
@@ -94,7 +101,7 @@ export default function CreateEventPage() {
       </header>
 
       <form className="create-event-form" onSubmit={handleSubmit}>
-        {/* EVENT NAVN */}
+        {/* EVENTETS NAVN */}
         <label>
           Eventets navn
           <input
@@ -151,6 +158,36 @@ export default function CreateEventPage() {
           />
         </label>
 
+        <label>
+        Antal pladser
+
+         <input
+         id="event-capacity"
+         name="event-capacity"
+         type="number"
+         min="1"
+         step="1"
+         value={capacity}
+         onChange={(event) => setCapacity(event.target.value)}
+         placeholder="Fx 20"
+          required
+         />
+        </label>
+
+        {/* BESKRIVELSE */}
+        <label>
+          Beskrivelse
+          <textarea
+            id="event-description"
+            name="event-description"
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            placeholder="Beskriv eventet, hvad der skal ske, og hvad deltagerne kan forvente..."
+            rows="6"
+            required
+          />
+        </label>
+
         {/* BILLEDE */}
         <label>
           Billede
@@ -164,7 +201,6 @@ export default function CreateEventPage() {
           />
         </label>
 
-        {/* VALGT BILLEDE */}
         {image && (
           <div className="image-selected">
             <p>
@@ -174,12 +210,10 @@ export default function CreateEventPage() {
           </div>
         )}
 
-        {/* OPRET EVENT */}
         <button type="submit" disabled={loading}>
           {loading ? "Opretter event..." : "Opret event"}
         </button>
 
-        {/* FEJLBESKED */}
         {errorMessage && <p className="create-event-error">{errorMessage}</p>}
       </form>
     </main>
