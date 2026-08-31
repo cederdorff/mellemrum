@@ -1,0 +1,117 @@
+.create-event-page {
+  margin: 0 auto;
+  max-width: 1000px;
+}
+
+.create-event-header {
+  margin-bottom: 3rem;
+  max-width: 750px;
+}
+
+.create-event-header h1 {
+  font-size: clamp(3rem, 7vw, 6rem);
+  letter-spacing: -0.06em;
+  line-height: 0.95;
+  margin: 0 0 1.5rem;
+}
+
+.create-event-header > p:not(.eyebrow) {
+  color: #59635f;
+  font-size: 1.15rem;
+  line-height: 1.6;
+}
+
+.create-event-form {
+  background: var(--lime);
+  border-radius: 18px;
+  display: grid;
+  gap: 1.5rem;
+  padding: clamp(2rem, 5vw, 4rem);
+}
+
+.create-event-form label {
+  display: grid;
+  font-size: 0.8rem;
+  font-weight: 800;
+  gap: 0.5rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.create-event-form input,
+.create-event-form textarea,
+.create-event-form select {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--ink);
+  padding: 0.85rem 1rem;
+  width: 100%;
+}
+
+.create-event-form input,
+.create-event-form select {
+  min-height: 55px;
+}
+
+.create-event-form textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+.create-event-form input:focus,
+.create-event-form textarea:focus,
+.create-event-form select:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(23, 63, 53, 0.15);
+  outline: none;
+}
+
+/* Hvis to felter skal stå ved siden af hinanden */
+
+.create-event-row {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+}
+
+.create-event-form button {
+  background: var(--green);
+  border: 0;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 800;
+  margin-top: 1rem;
+  min-height: 58px;
+  padding: 0.9rem 1.2rem;
+}
+
+.create-event-form button:hover {
+  opacity: 0.9;
+}
+
+.create-event-form button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.create-event-success {
+  background: #dff3cc;
+  border-radius: 14px;
+  color: var(--green);
+  padding: 1rem 1.2rem;
+}
+
+.create-event-error {
+  background: #f3cccc;
+  border-radius: 14px;
+  color: #8a2525;
+  padding: 1rem 1.2rem;
+}
+
+@media (max-width: 650px) {
+  .create-event-row {
+    grid-template-columns: 1fr;
+  }
+}

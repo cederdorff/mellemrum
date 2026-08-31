@@ -136,3 +136,23 @@
 .signup-success-link:hover {
   opacity: 0.75;
 }
+
+.signup-login,
+.signup-action {
+  align-content: center;
+}
+
+.signup-login-button {
+  background: var(--green);
+  color: white;
+  display: inline-block;
+  font-weight: 800;
+  padding: 1rem 1.4rem;
+  text-align: center;
+  text-decoration: none;
+  width: 100%;
+}
+
+.signup-login-button:hover {
+  opacity: 0.9;
+}
