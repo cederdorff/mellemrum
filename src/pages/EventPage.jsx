@@ -1,129 +1,307 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const headers = {
-  apikey: import.meta.env.VITE_SUPABASE_APIKEY,
-  "Content-Type": "application/json"
-};
+import { supabase } from "../lib/supabase";
+import { useAuth } from "../context/AuthContext";
+
+import "./EventPage.css";
 
 export default function EventPage() {
   const { eventId } = useParams();
-  const [event, setEvent] = useState(null);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const { user } = useAuth();
 
+  const [event, setEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [registering, setRegistering] = useState(false);
+
+  const [submitError, setSubmitError] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  // HENT DET VALGTE EVENT
   useEffect(() => {
     async function getEvent() {
-      const response = await fetch(`${SUPABASE_URL}/events?id=eq.${eventId}`, { headers });
-      const data = await response.json();
-      setEvent(data[0]);
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from("events")
+        .select("*")
+        .eq("id", eventId)
+        .single();
+
+      if (error) {
+        console.error("Kunne ikke hente event:", error);
+        setLoading(false);
+        return;
+      }
+
+      setEvent(data);
+      setLoading(false);
     }
 
     getEvent();
   }, [eventId]);
 
-  async function handleSubmit(eventSubmit) {
-    eventSubmit.preventDefault();
-    console.log({ name, email, event: event.title });
+  // SKIFT TITEL I BROWSERFANEN
+  useEffect(() => {
+    if (event) {
+      document.title = `${event.title} | Mellemrum`;
+    }
+  }, [event]);
+
+  // TJEK OM BRUGEREN ALLEREDE ER TILMELDT
+  useEffect(() => {
+    async function checkRegistration() {
+      if (!user || !eventId) {
+        setIsRegistered(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("event_registrations")
+        .select("id")
+        .eq("event_id", eventId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Kunne ikke kontrollere tilmelding:", error);
+        return;
+      }
+
+      setIsRegistered(Boolean(data));
+    }
+
+    checkRegistration();
+  }, [user, eventId]);
+
+  // TILMELD BRUGEREN
+  async function handleRegistration() {
+    if (!user) {
+      return;
+    }
+
+    setRegistering(true);
+    setSubmitError("");
+
+    const { error } = await supabase.from("event_registrations").insert({
+      event_id: event.id,
+      user_id: user.id,
+    });
+
+    if (error) {
+      console.error("Fejl ved tilmelding:", error);
+
+      setSubmitError("Der skete en fejl ved tilmeldingen. Prøv venligst igen.");
+
+      setRegistering(false);
+      return;
+    }
+
+    setIsRegistered(true);
+    setSubmitted(true);
+    setRegistering(false);
   }
 
+  // LOADING
+  if (loading) {
+    return (
+      <main className="event-page">
+        <p>Indlæser event...</p>
+      </main>
+    );
+  }
+
+  // EVENT FINDES IKKE
   if (!event) {
-    return null;
+    return (
+      <main className="event-page">
+        <p>Eventet kunne ikke findes.</p>
+
+        <Link className="back-link" to="/">
+          ← Tilbage til alle events
+        </Link>
+      </main>
+    );
   }
 
   const date = new Date(event.date);
 
   return (
-    <>
-      <main className="event-page">
-        <Link className="back-link" to="/">
-          ← Alle events
-        </Link>
+    <main className="event-page">
+      <Link className="back-link" to="/">
+        ← Alle events
+      </Link>
 
-        <section className="event-detail">
-          <img src={event.image} alt="" />
-          <div className="event-detail-content">
-            <p className="event-category">{event.category}</p>
-            <h1>{event.title}</h1>
-            <p className="lead">{event.summary}</p>
-            <div className="detail-list">
-              <p>
-                <strong>Dato</strong>
-                {date.toLocaleDateString("da-DK", { weekday: "long", day: "numeric", month: "long" })} kl.{" "}
-                {date.toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" })}
-              </p>
-              <p>
-                <strong>Sted</strong>
-                <span>
-                  {event.venueName}
-                  <br />
-                  {event.venueAddress}, {event.venuePostalCode} {event.venueCity}
-                  {event.venueWebsite && (
-                    <>
-                      <br />
-                      <a href={event.venueWebsite}>Besøg venue</a>
-                    </>
-                  )}
-                </span>
-              </p>
-              <p>
-                <strong>Pris</strong>
-                {event.price === 0 ? "Gratis" : `${event.price} kr.`}
-              </p>
-            </div>
-            <p>{event.description}</p>
-          </div>
-        </section>
+      {/* EVENT INFORMATION */}
+      <section className="event-detail">
+        <img src={event.image} alt={event.title} />
 
-        <section className="signup-panel">
-          <div>
-            <p className="eyebrow dark">Tilmelding</p>
-            <h2>Reserver din plads</h2>
-            <p>Udfyld formularen, så sender vi din tilmelding til arrangøren.</p>
-          </div>
+        <div className="event-detail-content">
+          {event.category && <p className="event-category">{event.category}</p>}
 
-          <form onSubmit={handleSubmit}>
-            <label>
-              Navn
-              <input value={name} onChange={(inputEvent) => setName(inputEvent.target.value)} />
-            </label>
-            <span>E-mail</span>
-            <input
-              value={email}
-              onChange={(inputEvent) => setEmail(inputEvent.target.value)}
-              placeholder="dig@example.com"
-            />
-            <button type="submit">Tilmeld mig</button>
-          </form>
-        </section>
-      </main>
-      <footer className="site-footer">
-        <div className="footer-top">
-          <div className="footer-intro">
-            <p className="footer-brand">
-              mellemrum<span>.</span>
+          <h1>{event.title}</h1>
+
+          {user && event.created_by === user.id && (
+            <Link
+              className="edit-event-link"
+              to={`/events/${event.id}/rediger`}
+            >
+              Rediger event
+            </Link>
+          )}
+
+          {event.summary && <p className="lead">{event.summary}</p>}
+
+          <div className="detail-list">
+            {/* DATO */}
+            <p>
+              <strong>Dato</strong>
+
+              <span>
+                {date.toLocaleDateString("da-DK", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                })}{" "}
+                kl.{" "}
+                {date.toLocaleTimeString("da-DK", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
             </p>
-            <p>Udvalgte kulturoplevelser og nye perspektiver på Aarhus.</p>
+
+            {/* STED */}
+            <p>
+              <strong>Sted</strong>
+
+              <span>
+                {event.venueName}
+
+                {(event.venueAddress ||
+                  event.venuePostalCode ||
+                  event.venueCity) && (
+                  <>
+                    <br />
+
+                    {event.venueAddress}
+
+                    {event.venueAddress && event.venuePostalCode && ", "}
+
+                    {event.venuePostalCode}
+
+                    {event.venuePostalCode && event.venueCity && " "}
+
+                    {event.venueCity}
+                  </>
+                )}
+
+                {event.venueWebsite && (
+                  <>
+                    <br />
+
+                    <a
+                      href={event.venueWebsite}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Besøg venue
+                    </a>
+                  </>
+                )}
+              </span>
+            </p>
+
+            {/* PRIS */}
+            <p>
+              <strong>Pris</strong>
+
+              <span>
+                {Number(event.price) === 0 ? "Gratis" : `${event.price} kr.`}
+              </span>
+            </p>
           </div>
-          <nav className="footer-links" aria-label="Footer">
-            <div className="footer-link-group">
-              <p className="footer-heading">Udforsk</p>
-              <Link to="/">Events</Link>
-              <Link to="/om">Om Mellemrum</Link>
-            </div>
-            <div className="footer-link-group">
-              <p className="footer-heading">For arrangører</p>
-              <Link to="/tilmeldinger">Se tilmeldinger</Link>
-              <a href="mailto:hej@mellemrum.dk">Kontakt os</a>
-            </div>
-          </nav>
+
+          {event.description && <p>{event.description}</p>}
         </div>
-        <div className="footer-bottom">
-          <p className="footer-meta">© 2025 Mellemrum</p>
-          <p>Aarhus, Danmark</p>
-        </div>
-      </footer>
-    </>
+      </section>
+
+      {/* TILMELDING */}
+      <section className="signup-panel">
+        {/* BRUGEREN HAR NETOP TILMELDT SIG */}
+        {submitted ? (
+          <div className="signup-success">
+            <p className="eyebrow dark">Tilmeldt</p>
+
+            <h2>Tak for din tilmelding!</h2>
+
+            <p>Du er nu tilmeldt {event.title}.</p>
+
+            <Link className="signup-success-link" to="/profil">
+              Se mine tilmeldinger
+            </Link>
+          </div>
+        ) : !user ? (
+          /* IKKE LOGGET IND */
+          <>
+            <div>
+              <p className="eyebrow dark">Tilmelding</p>
+
+              <h2>Vil du med?</h2>
+
+              <p>
+                Log ind eller opret en bruger for at tilmelde dig arrangementet.
+              </p>
+            </div>
+
+            <div className="signup-login">
+              <Link className="signup-login-button" to="/login">
+                Log ind for at tilmelde dig
+              </Link>
+            </div>
+          </>
+        ) : isRegistered ? (
+          /* ALLEREDE TILMELDT */
+          <div className="signup-success">
+            <p className="eyebrow dark">Tilmeldt</p>
+
+            <h2>Du er allerede tilmeldt</h2>
+
+            <p>Dette arrangement ligger allerede under dine tilmeldinger.</p>
+
+            <Link className="signup-success-link" to="/profil">
+              Se mine tilmeldinger
+            </Link>
+          </div>
+        ) : (
+          /* LOGGET IND OG IKKE TILMELDT */
+          <>
+            <div>
+              <p className="eyebrow dark">Tilmelding</p>
+
+              <h2>Reserver din plads</h2>
+
+              <p>
+                Du er logget ind og kan tilmelde dig arrangementet med ét klik.
+              </p>
+            </div>
+
+            <div className="signup-action">
+              <button
+                type="button"
+                onClick={handleRegistration}
+                disabled={registering}
+              >
+                {registering ? "Tilmelder..." : "Tilmeld mig"}
+              </button>
+
+              {submitError && <p className="form-error">{submitError}</p>}
+            </div>
+          </>
+        )}
+      </section>
+    </main>
   );
 }

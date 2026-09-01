@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
+import "./HomePage.css";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const headers = {
@@ -24,36 +25,54 @@ export default function HomePage() {
 
   const categories = ["Alle", ...new Set(events.map((event) => event.category))];
 
-  const filteredEvents = events.filter((event) => {
-    const searchText = `${event.title} ${event.summary} ${event.venueName}`.toLowerCase();
-    const matchesSearch = searchText.includes(search.toLowerCase());
-    const matchesCategory = category === "Alle" || event.category === category;
+const filteredEvents = events.filter((event) => {
+  const searchText =
+    `${event.title} ${event.summary} ${event.venueName}`.toLowerCase();
+  const matchesSearch = searchText.includes(search.toLowerCase());
+  const matchesCategory = category === "Alle" || event.category === category;
 
-    return matchesSearch && matchesCategory;
+  return matchesSearch && matchesCategory;
+});
+
+
+function formatEventDate(eventDate) {
+  const date = new Date(eventDate);
+
+  const formattedDate = date.toLocaleDateString("da-DK", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
   });
 
-  function formatEventDate(eventDate) {
-    const date = new Date(eventDate);
-    const formattedDate = date.toLocaleDateString("da-DK", {
-      weekday: "long",
-      day: "numeric",
-      month: "long"
-    });
-
-    return formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-  }
+  return formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+}
 
   return (
     <>
       <header className="hero">
-        <p className="eyebrow">Kultur i Aarhus</p>
-        <h1>Find plads til noget nyt.</h1>
-        <p className="hero-copy">
-          Koncerter, talks og workshops samlet ét sted. Find dit næste event, og tilmeld dig på få minutter.
-        </p>
-        <a className="hero-link" href="#events">
-          Se kommende events ↓
-        </a>
+        <img
+          className="hero-image"
+          src="/hero.webp"
+          alt=""
+          fetchPriority="high"
+        />
+
+        <div className="hero-overlay"></div>
+
+        <div className="hero-content">
+          <p className="eyebrow">Kultur i Aarhus</p>
+
+          <h1>Find plads til noget nyt.</h1>
+
+          <p className="hero-copy">
+            Koncerter, talks og workshops samlet ét sted. Find dit næste event,
+            og tilmeld dig på få minutter.
+          </p>
+
+          <a className="hero-link" href="#events">
+            Se kommende events ↓
+          </a>
+        </div>
       </header>
 
       <main id="events">
@@ -69,15 +88,23 @@ export default function HomePage() {
           <label>
             Søg
             <input
+              id="event-search"
+              name="event-search"
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Søg efter titel eller sted"
             />
           </label>
+
           <label>
             Kategori
-            <select value={category} onChange={(event) => setCategory(event.target.value)}>
+            <select
+              id="event-category"
+              name="event-category"
+              value={category}
+              onChange={(event) => setCategory(event.target.value)}
+            >
               {categories.map((item) => (
                 <option key={item}>{item}</option>
               ))}
@@ -85,52 +112,42 @@ export default function HomePage() {
           </label>
         </section>
 
-        <section className="event-grid">
-          {filteredEvents.map((event) => (
-            <article className="event-card" key={event.id}>
-              <img src={event.image} alt="" />
-              <div className="event-card-content">
-                <p className="event-category">{event.category}</p>
-                <h3>{event.title}</h3>
-                <p>{event.summary}</p>
-                <div className="event-meta">
-                  <span>{formatEventDate(event.date)}</span>
-                  <span>{event.venueName}</span>
-                </div>
-                <Link className="card-link" to={`/events/${event.id}`}>
-                  Læs mere
-                </Link>
-              </div>
-            </article>
-          ))}
-        </section>
-      </main>
-      <footer className="site-footer">
-        <div className="footer-top">
-          <div className="footer-intro">
-            <p className="footer-brand">
-              mellemrum<span>.</span>
+        {filteredEvents.length === 0 ? (
+          <section className="no-results">
+            <h3>Ingen events fundet</h3>
+
+            <p>
+              Vi kunne ikke finde nogen events, der matcher din søgning. Prøv et
+              andet søgeord eller en anden kategori.
             </p>
-            <p>Udvalgte kulturoplevelser og nye perspektiver på Aarhus.</p>
-          </div>
-          <nav className="footer-links" aria-label="Footer">
-            <div className="footer-link-group">
-              <p className="footer-heading">Udforsk</p>
-              <Link to="/">Events</Link>
-              <Link to="/om">Om Mellemrum</Link>
-            </div>
-            <div className="footer-link-group">
-              <p className="footer-heading">For arrangører</p>
-              <Link to="/tilmeldinger">Se tilmeldinger</Link>
-              <a href="mailto:hej@mellemrum.dk">Kontakt os</a>
-            </div>
-          </nav>
-        </div>
-        <div className="footer-bottom">
-          <p className="footer-meta">© 2026 Mellemrum</p>
-          <p>Aarhus, Danmark</p>
-        </div>
-      </footer>
+          </section>
+        ) : (
+          <section className="event-grid">
+            {filteredEvents.map((event) => (
+              <article className="event-card" key={event.id}>
+                <img src={event.image} alt={event.title} loading="lazy" />
+
+                <div className="event-card-content">
+                  <p className="event-category">{event.category}</p>
+
+                  <h3>{event.title}</h3>
+
+                  <p>{event.summary}</p>
+
+                  <div className="event-meta">
+                    <span>{formatEventDate(event.date)}</span>
+                    <span>{event.venueName}</span>
+                  </div>
+
+                  <Link className="card-link" to={`/events/${event.id}`}>
+                    Læs mere
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </section>
+        )}
+      </main>
     </>
   );
 }

@@ -1,0 +1,99 @@
+.registration-row {
+  align-items: center;
+  display: grid;
+  gap: 1.2rem;
+
+  grid-template-columns:
+    1.5fr
+    1fr
+    0.8fr
+    0.9fr
+    0.9fr
+    0.7fr;
+
+  padding: 1.5rem 1.8rem;
+}
+
+.registration-action {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.registration-button,
+.registration-login-button,
+.registered-badge {
+  border: none;
+  border-radius: 999px;
+  display: inline-block;
+  font: inherit;
+  font-weight: 700;
+  padding: 0.7rem 1rem;
+  text-align: center;
+}
+
+.registration-button {
+  background: var(--green);
+  color: white;
+  cursor: pointer;
+}
+
+.registration-button:hover {
+  opacity: 0.9;
+}
+
+.registration-button:disabled {
+  cursor: default;
+}
+
+.registration-login-button {
+  background: var(--green);
+  color: white;
+  text-decoration: none;
+}
+
+.registered-badge {
+  background: #dff3cc;
+  color: var(--green);
+}
+
+.sold-out-button,
+.spots-badge.sold-out {
+  background: #f3cccc;
+  color: #8a2525;
+}
+
+.spots-badge {
+  background: #dff3cc;
+  border-radius: 999px;
+  display: inline-block;
+  font-weight: 700;
+  padding: 0.65rem 1rem;
+  text-align: center;
+  width: fit-content;
+}
+
+@media (max-width: 900px) {
+  .registration-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .registration-labels {
+    display: none;
+  }
+}
+
+.registration-event-link {
+  color: var(--green);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.registration-event-link:hover {
+  opacity: 0.65;
+}
+
+.event-link-column {
+  display: flex;
+  align-items: center;
+}
