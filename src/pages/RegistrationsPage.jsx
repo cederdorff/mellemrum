@@ -204,6 +204,7 @@ export default function RegistrationsPage() {
             <span>Dato</span>
             <span>Ledige pladser</span>
             <span>Tilmelding</span>
+            <span>Læs mere</span>
           </div>
 
           {/* EVENTS */}
@@ -229,7 +230,6 @@ export default function RegistrationsPage() {
 
                 {/* DATO */}
                 <span>{formatDate(event.date)}</span>
-
 
                 {/* LEDIGE PLADSER */}
                 <span
@@ -269,6 +269,15 @@ export default function RegistrationsPage() {
                       {registeringId === event.id ? "Tilmelder..." : "Tilmeld"}
                     </button>
                   )}
+                </div>
+
+                <div className="event-link-column">
+                  <Link
+                    className="registration-event-link"
+                    to={`/events/${event.id}`}
+                  >
+                    Se event
+                  </Link>
                 </div>
               </div>
             );
