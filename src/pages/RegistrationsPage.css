@@ -1,114 +1,82 @@
-
-.admin-header h1 {
-  font-size: clamp(3rem, 7vw, 6.5rem);
-  letter-spacing: -0.065em;
-  line-height: 0.95;
-  margin: 0;
-}
-
-.registration-list {
-  background: white;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: 0 8px 26px rgba(23, 32, 29, 0.05);
-  overflow: hidden;
-}
-
 .registration-row {
   align-items: center;
-  border-bottom: 1px solid var(--line);
   display: grid;
-  gap: 1rem;
-  grid-template-columns: 1.5fr 1.3fr 0.9fr 0.9fr 0.9fr 0.7fr;
-  padding: 1rem 1.2rem;
+  gap: 1.2rem;
+
+  grid-template-columns:
+    1.5fr
+    1fr
+    0.8fr
+    0.9fr
+    0.9fr;
+
+  padding: 1.5rem 1.8rem;
 }
 
-.registration-row:last-child {
-  border-bottom: 0;
+.registration-action {
+  display: flex;
+  justify-content: flex-start;
 }
 
-.registration-row strong,
-.registration-row small {
-  display: block;
-}
-
-.registration-row small {
-  color: #65706c;
-  margin-top: 0.2rem;
-}
-
-.registration-labels {
-  background: var(--cream);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.status {
-  background: #dff3cc;
+.registration-button,
+.registration-login-button,
+.registered-badge {
+  border: none;
   border-radius: 999px;
   display: inline-block;
-  font-size: 0.75rem;
-  font-weight: 750;
-  padding: 0.35rem 0.6rem;
+  font: inherit;
+  font-weight: 700;
+  padding: 0.7rem 1rem;
   text-align: center;
 }
 
-@media (max-width: 620px) {
+.registration-button {
+  background: var(--green);
+  color: white;
+  cursor: pointer;
+}
+
+.registration-button:hover {
+  opacity: 0.9;
+}
+
+.registration-button:disabled {
+  cursor: default;
+}
+
+.registration-login-button {
+  background: var(--green);
+  color: white;
+  text-decoration: none;
+}
+
+.registered-badge {
+  background: #dff3cc;
+  color: var(--green);
+}
+
+.sold-out-button,
+.spots-badge.sold-out {
+  background: #f3cccc;
+  color: #8a2525;
+}
+
+.spots-badge {
+  background: #dff3cc;
+  border-radius: 999px;
+  display: inline-block;
+  font-weight: 700;
+  padding: 0.65rem 1rem;
+  text-align: center;
+  width: fit-content;
+}
+
+@media (max-width: 900px) {
   .registration-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 
   .registration-labels {
     display: none;
   }
-}
-
-.registration-button {
-  border-radius: 999px;
-  display: inline-block;
-  font-weight: 800;
-  padding: 0.7rem 1rem;
-  text-align: center;
-  text-decoration: none;
-}
-
-/* Der er stadig pladser */
-.registration-button.available {
-  background: #dff3cc;
-  color: var(--green);
-  cursor: pointer;
-}
-
-/* Hover */
-.registration-button.available:hover {
-  background: var(--green);
-  color: white;
-}
-
-/* Ingen pladser */
-.registration-button.sold-out {
-  background: #f3cccc;
-  color: #8a2525;
-  cursor: not-allowed;
-}
-
-.status {
-  border-radius: 999px;
-  display: inline-block;
-  font-size: 0.75rem;
-  font-weight: 750;
-  padding: 0.35rem 0.6rem;
-  text-align: center;
-}
-
-.available-status {
-  background: #dff3cc;
-  color: var(--green);
-}
-
-.sold-out-status {
-  background: #f3cccc;
-  color: #8a2525;
 }

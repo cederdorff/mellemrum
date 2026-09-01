@@ -15,8 +15,9 @@ export default function EditEventPage() {
   const [date, setDate] = useState("");
   const [venueName, setVenueName] = useState("");
   const [price, setPrice] = useState("");
-  const [description, setDescription] = useState("");
   const [capacity, setCapacity] = useState("");
+  const [summary, setSummary] = useState("");
+  const [description, setDescription] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -24,6 +25,9 @@ export default function EditEventPage() {
 
   useEffect(() => {
     async function getEvent() {
+      setLoading(true);
+      setErrorMessage("");
+
       const { data, error } = await supabase
         .from("events")
         .select("*")
@@ -31,13 +35,13 @@ export default function EditEventPage() {
         .single();
 
       if (error) {
-        console.error(error);
+        console.error("Fejl ved hentning af event:", error);
         setErrorMessage("Eventet kunne ikke hentes.");
         setLoading(false);
         return;
       }
 
-      // Kontroller at brugeren ejer eventet
+      // Kun den bruger, der har oprettet eventet, må redigere det
       if (data.created_by !== user.id) {
         setErrorMessage("Du har ikke adgang til at redigere dette event.");
         setLoading(false);
@@ -45,11 +49,14 @@ export default function EditEventPage() {
       }
 
       setTitle(data.title || "");
+
       setDate(data.date ? new Date(data.date).toISOString().slice(0, 16) : "");
+
       setVenueName(data.venueName || "");
       setPrice(data.price ?? "");
-      setDescription(data.description || "");
       setCapacity(data.capacity ?? "");
+      setSummary(data.summary || "");
+      setDescription(data.description || "");
 
       setLoading(false);
     }
@@ -65,7 +72,7 @@ export default function EditEventPage() {
     setSaving(true);
     setErrorMessage("");
 
-    // Find hvor mange der allerede er tilmeldt
+    // Find antal personer der allerede er tilmeldt
     const { count, error: countError } = await supabase
       .from("event_registrations")
       .select("*", {
@@ -75,21 +82,25 @@ export default function EditEventPage() {
       .eq("event_id", eventId);
 
     if (countError) {
-      console.error(countError);
+      console.error("Fejl ved optælling af tilmeldinger:", countError);
+
       setErrorMessage("Kunne ikke kontrollere antal tilmeldinger.");
+
       setSaving(false);
       return;
     }
 
-    // Man må ikke sætte antal pladser lavere end antal tilmeldte
+    // Antal pladser må ikke sættes lavere end antal tilmeldte
     if (Number(capacity) < count) {
       setErrorMessage(
         `Der er allerede ${count} tilmeldte. Antal pladser kan derfor ikke sættes lavere end ${count}.`,
       );
+
       setSaving(false);
       return;
     }
 
+    // Opdater eventet
     const { error } = await supabase
       .from("events")
       .update({
@@ -97,19 +108,25 @@ export default function EditEventPage() {
         date,
         venueName,
         price: Number(price),
-        description,
         capacity: Number(capacity),
+        summary,
+        description,
       })
       .eq("id", eventId)
       .eq("created_by", user.id);
 
     if (error) {
       console.error("Fejl ved opdatering:", error);
+
       setErrorMessage("Eventet kunne ikke gemmes.");
+
       setSaving(false);
       return;
     }
 
+    setSaving(false);
+
+    // Tilbage til eventet
     navigate(`/events/${eventId}`);
   }
 
@@ -122,6 +139,8 @@ export default function EditEventPage() {
       return;
     }
 
+    setErrorMessage("");
+
     const { error } = await supabase
       .from("events")
       .delete()
@@ -130,7 +149,9 @@ export default function EditEventPage() {
 
     if (error) {
       console.error("Fejl ved sletning:", error);
+
       setErrorMessage("Eventet kunne ikke slettes.");
+
       return;
     }
 
@@ -166,9 +187,12 @@ export default function EditEventPage() {
       </header>
 
       <form className="create-event-form" onSubmit={handleUpdate}>
+        {/* EVENTETS NAVN */}
         <label>
           Eventets navn
           <input
+            id="edit-event-title"
+            name="title"
             type="text"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
@@ -176,9 +200,12 @@ export default function EditEventPage() {
           />
         </label>
 
+        {/* DATO OG TID */}
         <label>
           Dato og tidspunkt
           <input
+            id="edit-event-date"
+            name="date"
             type="datetime-local"
             value={date}
             onChange={(event) => setDate(event.target.value)}
@@ -186,9 +213,12 @@ export default function EditEventPage() {
           />
         </label>
 
+        {/* STED */}
         <label>
           Sted
           <input
+            id="edit-event-location"
+            name="venueName"
             type="text"
             value={venueName}
             onChange={(event) => setVenueName(event.target.value)}
@@ -196,42 +226,71 @@ export default function EditEventPage() {
           />
         </label>
 
+        {/* PRIS */}
         <label>
           Pris
           <input
+            id="edit-event-price"
+            name="price"
             type="number"
             min="0"
+            step="1"
             value={price}
             onChange={(event) => setPrice(event.target.value)}
             required
           />
         </label>
 
+        {/* ANTAL PLADSER */}
         <label>
           Antal pladser
           <input
+            id="edit-event-capacity"
+            name="capacity"
             type="number"
             min="1"
+            step="1"
             value={capacity}
             onChange={(event) => setCapacity(event.target.value)}
             required
           />
         </label>
 
+        {/* KORT BESKRIVELSE */}
         <label>
-          Beskrivelse
+          Kort beskrivelse
           <textarea
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            rows="6"
+            id="edit-event-summary"
+            name="summary"
+            value={summary}
+            onChange={(event) => setSummary(event.target.value)}
+            rows="3"
+            maxLength="180"
+            placeholder="Kort tekst som vises på eventkortet..."
             required
           />
         </label>
 
+        {/* LANG BESKRIVELSE */}
+        <label>
+          Beskrivelse
+          <textarea
+            id="edit-event-description"
+            name="description"
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            rows="6"
+            placeholder="Beskriv eventet mere detaljeret..."
+            required
+          />
+        </label>
+
+        {/* GEM */}
         <button type="submit" disabled={saving}>
           {saving ? "Gemmer..." : "Gem ændringer"}
         </button>
 
+        {/* SLET */}
         <button
           type="button"
           className="delete-event-button"

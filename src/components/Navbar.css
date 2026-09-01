@@ -14,6 +14,7 @@
 }
 
 .brand {
+  color: white;
   font-size: 1.6rem;
   font-weight: 800;
   letter-spacing: -0.04em;
@@ -25,23 +26,53 @@
 }
 
 .nav-links {
+  align-items: center;
   display: flex;
   gap: 0.4rem;
 }
 
-.nav-links a {
+/* ALLE NAVIGATIONSPUNKTER */
+.nav-links a,
+.logout-button {
+  background: transparent;
+  border: none;
   border-radius: 999px;
   color: rgba(255, 255, 255, 0.78);
+
+  font-family: inherit;
   font-size: 0.92rem;
+  font-weight: 400;
+  line-height: 1;
+
+  margin: 0;
   padding: 0.55rem 0.85rem;
+
   text-decoration: none;
-  transition: background 160ms ease, color 160ms ease;
+  cursor: pointer;
+
+  transition:
+    background 160ms ease,
+    color 160ms ease;
 }
 
+/* HOVER */
 .nav-links a:hover,
+.logout-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+/* AKTIV SIDE */
 .nav-links a.active {
   background: rgba(255, 255, 255, 0.1);
   color: white;
+}
+
+/* FOKUS MED TASTATUR */
+.nav-links a:focus-visible,
+.logout-button:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 3px;
 }
 
 @media (max-width: 620px) {
@@ -51,5 +82,9 @@
     gap: 0.7rem;
     padding-bottom: 0.9rem;
     padding-top: 0.9rem;
+  }
+
+  .nav-links {
+    flex-wrap: wrap;
   }
 }

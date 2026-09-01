@@ -10,6 +10,7 @@ export default function CreateEventPage() {
 
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
+  const [summary, setSummary] = useState("");
   const [venueName, setVenueName] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
@@ -63,6 +64,7 @@ const [capacity, setCapacity] = useState("");
       .insert({
         title,
         date,
+        summary: summary,
         venueName,
         price: Number(price),
         description,
@@ -115,6 +117,20 @@ const [capacity, setCapacity] = useState("");
           />
         </label>
 
+        <label>
+          Kort beskrivelse
+          <textarea
+            id="event-summary"
+            name="event-summary"
+            value={summary}
+            onChange={(event) => setSummary(event.target.value)}
+            placeholder="Skriv en kort beskrivelse, der vises på eventkortet..."
+            rows="3"
+            maxLength="180"
+            required
+          />
+        </label>
+
         {/* DATO OG TID */}
         <label>
           Dato og tidspunkt
@@ -159,19 +175,18 @@ const [capacity, setCapacity] = useState("");
         </label>
 
         <label>
-        Antal pladser
-
-         <input
-         id="event-capacity"
-         name="event-capacity"
-         type="number"
-         min="1"
-         step="1"
-         value={capacity}
-         onChange={(event) => setCapacity(event.target.value)}
-         placeholder="Fx 20"
-          required
-         />
+          Antal pladser
+          <input
+            id="event-capacity"
+            name="event-capacity"
+            type="number"
+            min="1"
+            step="1"
+            value={capacity}
+            onChange={(event) => setCapacity(event.target.value)}
+            placeholder="Fx 20"
+            required
+          />
         </label>
 
         {/* BESKRIVELSE */}

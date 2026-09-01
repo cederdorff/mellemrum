@@ -21,7 +21,9 @@ export default function Navbar() {
 
             <Link to="/profil">Profil</Link>
 
-            <button onClick={signOut}>Log ud</button>
+            <button className="logout-button" onClick={signOut}>
+              Log ud
+            </button>
           </>
         ) : (
           <Link to="/login">Log ind</Link>
