@@ -2,7 +2,7 @@
 .page-header,
 .admin-header {
   background: var(--green);
-  color: rgb(181, 77, 77);
+  color: rgb(255, 255, 255);
   padding: 5rem var(--content-edge);
 }
 
