@@ -1,81 +1,289 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const headers = {
-  apikey: import.meta.env.VITE_SUPABASE_APIKEY,
-  "Content-Type": "application/json"
-};
+import { supabase } from "../lib/supabase";
+import { useAuth } from "../context/AuthContext";
+
+import "./RegistrationsPage.css";
 
 export default function RegistrationsPage() {
-  const [registrations, setRegistrations] = useState([]);
-  const [registrationCount, setRegistrationCount] = useState(0);
+  const { user } = useAuth();
+
+  const [events, setEvents] = useState([]);
+  const [myRegistrations, setMyRegistrations] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+  const [registeringId, setRegisteringId] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    async function getRegistrations() {
-      const response = await fetch(`${SUPABASE_URL}/registrations?order=createdAt.desc`, { headers });
-      const data = await response.json();
-      setRegistrations(data);
-      setRegistrationCount(data.length);
+    async function getData() {
+      setLoading(true);
+      setErrorMessage("");
+
+      // HENT ALLE EVENTS
+      const { data: eventData, error: eventError } = await supabase
+        .from("events")
+        .select(
+          `
+          id,
+          title,
+          date,
+          venueName,
+          capacity
+        `,
+        )
+        .order("date", { ascending: true });
+
+      if (eventError) {
+        console.error("Fejl ved hentning af events:", eventError);
+        setErrorMessage("Arrangementerne kunne ikke hentes.");
+        setLoading(false);
+        return;
+      }
+
+      // HENT ANTAL TILMELDTE TIL HVERT EVENT
+      const { data: countData, error: countError } = await supabase.rpc(
+        "get_event_registration_counts",
+      );
+
+      if (countError) {
+        console.error("Fejl ved hentning af antal tilmeldte:", countError);
+
+        setErrorMessage("Antallet af tilmeldinger kunne ikke hentes.");
+
+        setLoading(false);
+        return;
+      }
+
+      // Lav event_id → antal
+      const countMap = {};
+
+      countData?.forEach((item) => {
+        countMap[item.event_id] = Number(item.registered_count);
+      });
+
+      // Saml eventdata og antal tilmeldte
+      const eventsWithCounts = (eventData || []).map((event) => ({
+        ...event,
+        registeredCount: countMap[event.id] || 0,
+      }));
+
+      setEvents(eventsWithCounts);
+
+      // HVIS BRUGEREN ER LOGGET IND:
+      // hent brugerens egne tilmeldinger
+      if (user) {
+        const { data: registrationData, error: registrationError } =
+          await supabase
+            .from("event_registrations")
+            .select("id, event_id")
+            .eq("user_id", user.id);
+
+        if (registrationError) {
+          console.error(
+            "Kunne ikke hente dine tilmeldinger:",
+            registrationError,
+          );
+        } else {
+          setMyRegistrations(registrationData || []);
+        }
+      } else {
+        setMyRegistrations([]);
+      }
+
+      setLoading(false);
     }
 
-    getRegistrations();
-  }, []);
+    getData();
+  }, [user]);
+
+  function formatDate(eventDate) {
+    const date = new Date(eventDate);
+
+    return date.toLocaleDateString("da-DK", {
+      day: "numeric",
+      month: "numeric",
+      year: "numeric",
+    });
+  }
+
+  function isUserRegistered(eventId) {
+    return myRegistrations.some(
+      (registration) => Number(registration.event_id) === Number(eventId),
+    );
+  }
+
+  async function handleRegistration(event) {
+    if (!user) {
+      return;
+    }
+
+    const capacity = Number(event.capacity) || 0;
+    const registered = Number(event.registeredCount) || 0;
+
+    // Stop hvis eventet er fyldt
+    if (capacity > 0 && registered >= capacity) {
+      return;
+    }
+
+    // Stop hvis brugeren allerede er tilmeldt
+    if (isUserRegistered(event.id)) {
+      return;
+    }
+
+    setRegisteringId(event.id);
+    setErrorMessage("");
+
+    const { data, error } = await supabase
+      .from("event_registrations")
+      .insert({
+        event_id: event.id,
+        user_id: user.id,
+      })
+      .select("id, event_id")
+      .single();
+
+    if (error) {
+      console.error("Fejl ved tilmelding:", error);
+
+      if (error.code === "23505") {
+        setErrorMessage("Du er allerede tilmeldt dette event.");
+      } else {
+        setErrorMessage("Der skete en fejl ved tilmeldingen.");
+      }
+
+      setRegisteringId(null);
+      return;
+    }
+
+    // Registrer at brugeren nu er tilmeldt
+    setMyRegistrations((current) => [...current, data]);
+
+    // Opdater tallet direkte på siden
+    setEvents((currentEvents) =>
+      currentEvents.map((currentEvent) =>
+        currentEvent.id === event.id
+          ? {
+              ...currentEvent,
+              registeredCount: currentEvent.registeredCount + 1,
+            }
+          : currentEvent,
+      ),
+    );
+
+    setRegisteringId(null);
+  }
+
+  if (loading) {
+    return (
+      <main className="registrations-page">
+        <p>Indlæser arrangementer...</p>
+      </main>
+    );
+  }
 
   return (
     <>
       <header className="admin-header">
-        <p className="eyebrow">Internt overblik</p>
+        <p className="eyebrow">Event overblik</p>
+
         <h1>Tilmeldinger</h1>
-        <p>{registrationCount} tilmeldinger i alt</p>
+
+        <p>Se arrangementer, ledige pladser og tilmeld dig.</p>
       </header>
-      <main>
-        <div className="registration-list">
+
+      <main className="registrations-page">
+        {errorMessage && <p className="form-error">{errorMessage}</p>}
+
+        <section className="registration-list">
+          {/* OVERSKRIFTER */}
           <div className="registration-row registration-labels">
-            <span>Navn</span>
             <span>Event</span>
+            <span>Sted</span>
             <span>Dato</span>
-            <span>Status</span>
+            <span>Ledige pladser</span>
+            <span>Tilmelding</span>
+            <span>Læs mere</span>
           </div>
-          {registrations.map((registration) => (
-            <div className="registration-row" key={registration.id}>
-              <div>
-                <strong>{registration.name}</strong>
-                <small>{registration.email}</small>
+
+          {/* EVENTS */}
+          {events.map((event) => {
+            const registered = Number(event.registeredCount) || 0;
+
+            const capacity = Number(event.capacity) || 0;
+
+            const remaining =
+              capacity > 0 ? Math.max(capacity - registered, 0) : null;
+
+            const soldOut = capacity > 0 && remaining === 0;
+
+            const registeredByUser = isUserRegistered(event.id);
+
+            return (
+              <div className="registration-row" key={event.id}>
+                {/* EVENT */}
+                <strong>{event.title}</strong>
+
+                {/* STED */}
+                <span>{event.venueName || "Ikke angivet"}</span>
+
+                {/* DATO */}
+                <span>{formatDate(event.date)}</span>
+
+                {/* LEDIGE PLADSER */}
+                <span
+                  className={soldOut ? "spots-badge sold-out" : "spots-badge"}
+                >
+                  {capacity === 0 ? "Ikke angivet" : `${remaining} tilbage`}
+                </span>
+
+                {/* TILMELDING */}
+                {/* TILMELDING */}
+                <div className="registration-action">
+                  {!user ? (
+                    soldOut ? (
+                      <span className="sold-out-button">Udsolgt</span>
+                    ) : (
+                      <Link className="registration-login-button" to="/login">
+                        Log ind
+                      </Link>
+                    )
+                  ) : registeredByUser ? (
+                    <span className="registered-badge">Tilmeldt</span>
+                  ) : soldOut ? (
+                    <button
+                      type="button"
+                      className="registration-button sold-out-button"
+                      disabled
+                    >
+                      Udsolgt
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="registration-button"
+                      onClick={() => handleRegistration(event)}
+                      disabled={registeringId === event.id}
+                    >
+                      {registeringId === event.id ? "Tilmelder..." : "Tilmeld"}
+                    </button>
+                  )}
+                </div>
+
+                <div className="event-link-column">
+                  <Link
+                    className="registration-event-link"
+                    to={`/events/${event.id}`}
+                  >
+                    Se event
+                  </Link>
+                </div>
               </div>
-              <span>{registration.eventTitle}</span>
-              <span>{new Date(registration.eventDate).toLocaleDateString("da-DK")}</span>
-              <span className="status">{registration.status}</span>
-            </div>
-          ))}
-        </div>
+            );
+          })}
+        </section>
       </main>
-      <footer className="site-footer">
-        <div className="footer-top">
-          <div className="footer-intro">
-            <p className="footer-brand">
-              mellemrum<span>.</span>
-            </p>
-            <p>Udvalgte kulturoplevelser og nye perspektiver på Aarhus.</p>
-          </div>
-          <nav className="footer-links" aria-label="Footer">
-            <div className="footer-link-group">
-              <p className="footer-heading">Udforsk</p>
-              <Link to="/">Events</Link>
-              <Link to="/om">Om Mellemrum</Link>
-            </div>
-            <div className="footer-link-group">
-              <p className="footer-heading">For arrangører</p>
-              <Link to="/tilmeldinger">Se tilmeldinger</Link>
-              <a href="mailto:hej@mellemrum.dk">Kontakt os</a>
-            </div>
-          </nav>
-        </div>
-        <div className="footer-bottom">
-          <p className="footer-meta">© 2025 Mellemrum</p>
-          <p>Aarhus, Danmark</p>
-        </div>
-      </footer>
     </>
   );
 }
