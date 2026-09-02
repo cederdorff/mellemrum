@@ -12,7 +12,9 @@ export default function Navbar() {
       </Link>
 
       <div className="nav-links">
-        <Link to="/">Events</Link>
+        <a className="hero-link" href="#events">
+          Events
+        </a>
         <Link to="/om">Om Mellemrum</Link>
 
         {user ? (

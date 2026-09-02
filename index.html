@@ -1,18 +1,25 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    
-    <link rel="icon" type="image/mellemrum-logo" href="/mellemrum-mark.svg" />
+  <meta charset="UTF-8" />
 
+  <link
+    rel="preload"
+    as="image"
+    href="%BASE_URL%hero.webp"
+    type="image/webp"
+    fetchpriority="high"
+  />
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="React Router SPA Supabase Template for building modern web applications"
-    />
-    <title>Mellemrum. | Find plads til noget nyt. | React</title>
-  </head>
+<link rel="icon" type="image/svg+xml" href="%BASE_URL%mellemrum-mark.svg" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>Mellemrum</title>
+</head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>

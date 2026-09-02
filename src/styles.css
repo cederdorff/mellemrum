@@ -94,5 +94,11 @@ select {
   padding: 1rem;
 }
 
+.page-loading {
+  min-height: 60vh;
+  display: grid;
+  place-items: center;
+}
+
 
 
