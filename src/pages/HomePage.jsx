@@ -1,58 +1,112 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
+
 import "./HomePage.css";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+
 const headers = {
   apikey: import.meta.env.VITE_SUPABASE_APIKEY,
-  "Content-Type": "application/json"
+  "Content-Type": "application/json",
 };
+
+// Sørger for at både lokale billeder og Supabase-billeder virker
+function getImageUrl(image) {
+  if (!image) {
+    return "";
+  }
+
+  // Nye billeder fra Supabase Storage
+  if (image.startsWith("http://") || image.startsWith("https://")) {
+    return image;
+  }
+
+  // Gamle billeder fra public-mappen
+  const cleanImage = image.replace(/^\/+/, "");
+
+  return `${import.meta.env.BASE_URL}${cleanImage}`;
+}
 
 export default function HomePage() {
   const [events, setEvents] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("Alle");
 
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  // HENT EVENTS FRA SUPABASE
   useEffect(() => {
     async function getEvents() {
-      const response = await fetch(`${SUPABASE_URL}/events?order=date.asc`, { headers });
-      const data = await response.json();
-      setEvents(data);
+      setLoading(true);
+      setErrorMessage("");
+
+      try {
+        const response = await fetch(`${SUPABASE_URL}/events?order=date.asc`, {
+          headers,
+        });
+
+        if (!response.ok) {
+          throw new Error("Kunne ikke hente events");
+        }
+
+        const data = await response.json();
+
+        setEvents(data);
+      } catch (error) {
+        console.error("Fejl ved hentning af events:", error);
+
+        setErrorMessage("Events kunne ikke hentes. Prøv igen senere.");
+      } finally {
+        setLoading(false);
+      }
     }
 
     getEvents();
   }, []);
 
-  const categories = ["Alle", ...new Set(events.map((event) => event.category))];
+  // FIND ALLE KATEGORIER
+  // filter(Boolean) fjerner tomme kategorier
+  const categories = [
+    "Alle",
+    ...new Set(events.map((event) => event.category).filter(Boolean)),
+  ];
 
-const filteredEvents = events.filter((event) => {
-  const searchText =
-    `${event.title} ${event.summary} ${event.venueName}`.toLowerCase();
-  const matchesSearch = searchText.includes(search.toLowerCase());
-  const matchesCategory = category === "Alle" || event.category === category;
+  // SØGNING + KATEGORI-FILTER
+  const filteredEvents = events.filter((event) => {
+    const searchText = `
+      ${event.title || ""}
+      ${event.summary || ""}
+      ${event.venueName || ""}
+    `.toLowerCase();
 
-  return matchesSearch && matchesCategory;
-});
+    const matchesSearch = searchText.includes(search.toLowerCase());
 
+    const matchesCategory = category === "Alle" || event.category === category;
 
-function formatEventDate(eventDate) {
-  const date = new Date(eventDate);
-
-  const formattedDate = date.toLocaleDateString("da-DK", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
+    return matchesSearch && matchesCategory;
   });
 
-  return formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-}
+  // FORMATÉR DATO
+  function formatEventDate(eventDate) {
+    const date = new Date(eventDate);
+
+    const formattedDate = date.toLocaleDateString("da-DK", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
+
+    return formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+  }
 
   return (
     <>
+      {/* HERO */}
       <header className="hero">
         <img
           className="hero-image"
-          src="/hero.webp"
+          src={`${import.meta.env.BASE_URL}hero.webp`}
           alt=""
           fetchPriority="high"
         />
@@ -75,15 +129,19 @@ function formatEventDate(eventDate) {
         </div>
       </header>
 
+      {/* EVENTS */}
       <main id="events">
         <section className="section-heading">
           <div>
             <p className="eyebrow dark">Det sker</p>
+
             <h2>Kommende events</h2>
           </div>
+
           <p>Kuraterede oplevelser i byen – fra små scener til store idéer.</p>
         </section>
 
+        {/* FILTER */}
         <section className="filters">
           <label>
             Søg
@@ -106,13 +164,32 @@ function formatEventDate(eventDate) {
               onChange={(event) => setCategory(event.target.value)}
             >
               {categories.map((item) => (
-                <option key={item}>{item}</option>
+                <option key={item} value={item}>
+                  {item}
+                </option>
               ))}
             </select>
           </label>
         </section>
 
-        {filteredEvents.length === 0 ? (
+        {/* LOADING */}
+        {loading && (
+          <section className="events-loading">
+            <p>Indlæser events...</p>
+          </section>
+        )}
+
+        {/* FEJL */}
+        {!loading && errorMessage && (
+          <section className="no-results">
+            <h3>Der skete en fejl</h3>
+
+            <p>{errorMessage}</p>
+          </section>
+        )}
+
+        {/* INGEN RESULTATER */}
+        {!loading && !errorMessage && filteredEvents.length === 0 && (
           <section className="no-results">
             <h3>Ingen events fundet</h3>
 
@@ -121,21 +198,34 @@ function formatEventDate(eventDate) {
               andet søgeord eller en anden kategori.
             </p>
           </section>
-        ) : (
+        )}
+
+        {/* EVENT-KORT */}
+        {!loading && !errorMessage && filteredEvents.length > 0 && (
           <section className="event-grid">
             {filteredEvents.map((event) => (
               <article className="event-card" key={event.id}>
-                <img src={event.image} alt={event.title} loading="lazy" />
+                {event.image && (
+                  <img
+                    src={getImageUrl(event.image)}
+                    alt={event.title}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
 
                 <div className="event-card-content">
-                  <p className="event-category">{event.category}</p>
+                  {event.category && (
+                    <p className="event-category">{event.category}</p>
+                  )}
 
                   <h3>{event.title}</h3>
 
-                  <p>{event.summary}</p>
+                  {event.summary && <p>{event.summary}</p>}
 
                   <div className="event-meta">
                     <span>{formatEventDate(event.date)}</span>
+
                     <span>{event.venueName}</span>
                   </div>
 
