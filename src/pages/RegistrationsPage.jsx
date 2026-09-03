@@ -177,7 +177,7 @@ export default function RegistrationsPage() {
 
   if (loading) {
     return (
-      <main className="registrations-page">
+      <main className="registrations-page registrations-loading">
         <p>Indlæser arrangementer...</p>
       </main>
     );

@@ -1,99 +1,543 @@
+/* ========================================
+   REGISTRATIONS PAGE
+======================================== */
+
+.registrations-page {
+  width: 100%;
+  max-width: 1300px;
+  min-height: 70vh;
+
+  margin: 0 auto;
+  padding: 4rem var(--content-edge);
+
+  box-sizing: border-box;
+}
+
+
+/* ========================================
+   HEADER
+======================================== */
+
+.admin-header {
+  width: 100%;
+  max-width: 1300px;
+
+  margin: 0 auto;
+  padding: 4rem var(--content-edge) 2rem;
+
+  box-sizing: border-box;
+}
+
+.admin-header .eyebrow {
+  color: var(--green);
+
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+
+  margin: 0 0 1rem;
+}
+
+.admin-header h1 {
+  color: var(--green);
+
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+
+  margin: 0 0 1.5rem;
+}
+
+.admin-header > p:last-child {
+  max-width: 650px;
+
+  font-size: 1.05rem;
+  line-height: 1.6;
+
+  margin: 0;
+}
+
+
+/* ========================================
+   LOADING
+======================================== */
+
+.registrations-loading {
+  min-height: 650px;
+}
+
+
+/* ========================================
+   TABEL / LISTE
+======================================== */
+
+.registration-list {
+  width: 100%;
+
+  background: white;
+
+  border: 1px solid rgba(20, 60, 48, 0.14);
+  border-radius: 22px;
+
+  overflow: hidden;
+
+  box-shadow: 0 12px 35px rgba(18, 52, 43, 0.06);
+}
+
+
+/* ========================================
+   RÆKKER
+======================================== */
+
 .registration-row {
-  align-items: center;
+  width: 100%;
+
   display: grid;
-  gap: 1.2rem;
 
   grid-template-columns:
-    1.5fr
+    1.8fr
+    1.15fr
+    0.9fr
     1fr
-    0.8fr
-    0.9fr
-    0.9fr
-    0.7fr;
+    1fr
+    0.75fr;
 
-  padding: 1.5rem 1.8rem;
+  align-items: center;
+
+  column-gap: 1.5rem;
+
+  min-height: 105px;
+
+  padding: 1.5rem 2rem;
+
+  border-bottom: 1px solid rgba(20, 60, 48, 0.12);
+
+  box-sizing: border-box;
 }
+
+
+/* Forhindrer lange tekster i at ødelægge grid */
+.registration-row > * {
+  min-width: 0;
+}
+
+
+/* Ingen streg efter sidste event */
+.registration-row:last-child {
+  border-bottom: none;
+}
+
+
+/* ========================================
+   OVERSKRIFTER
+======================================== */
+
+.registration-labels {
+  min-height: auto;
+
+  background: #ebe7dc;
+
+  padding-top: 1.15rem;
+  padding-bottom: 1.15rem;
+}
+
+.registration-labels span {
+  color: var(--green);
+
+  font-size: 0.78rem;
+  font-weight: 800;
+
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+
+/* ========================================
+   EVENTNAVN
+======================================== */
+
+.registration-row strong {
+  color: var(--green);
+
+  font-size: 1rem;
+  font-weight: 750;
+
+  line-height: 1.35;
+
+  overflow-wrap: break-word;
+}
+
+
+/* ========================================
+   ALMINDELIG TEKST
+======================================== */
+
+.registration-row > span {
+  color: #17211e;
+
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+
+/* ========================================
+   LEDIGE PLADSER
+======================================== */
+
+.spots-badge {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: fit-content;
+  min-width: 105px;
+
+  background: #dcf3ca;
+  color: var(--green);
+
+  border-radius: 999px;
+
+  font-size: 0.92rem;
+  font-weight: 750;
+
+  padding: 0.7rem 1rem;
+
+  white-space: nowrap;
+}
+
+
+/* Udsolgt */
+.spots-badge.sold-out {
+  background: #f4cccc;
+  color: #922c2c;
+}
+
+
+/* ========================================
+   TILMELDINGSKOLONNE
+======================================== */
 
 .registration-action {
   display: flex;
+
+  align-items: center;
   justify-content: flex-start;
 }
 
+
+/* Fælles styling */
 .registration-button,
+.registered-badge,
 .registration-login-button,
-.registered-badge {
+.sold-out-button {
+  appearance: none;
+  -webkit-appearance: none;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-width: 105px;
+  min-height: 44px;
+
   border: none;
   border-radius: 999px;
-  display: inline-block;
-  font: inherit;
-  font-weight: 700;
+
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 750;
+  line-height: 1;
+
   padding: 0.7rem 1rem;
-  text-align: center;
+
+  box-sizing: border-box;
+
+  white-space: nowrap;
 }
+
+
+/* ========================================
+   TILMELD-KNAP
+======================================== */
 
 .registration-button {
   background: var(--green);
   color: white;
+
   cursor: pointer;
+
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
 }
 
-.registration-button:hover {
-  opacity: 0.9;
+.registration-button:hover:not(:disabled) {
+  opacity: 0.88;
+  transform: translateY(-1px);
 }
 
 .registration-button:disabled {
   cursor: default;
 }
 
-.registration-login-button {
-  background: var(--green);
-  color: white;
-  text-decoration: none;
-}
+
+/* ========================================
+   TILMELDT
+======================================== */
 
 .registered-badge {
-  background: #dff3cc;
+  background: #dcf3ca;
   color: var(--green);
 }
 
-.sold-out-button,
-.spots-badge.sold-out {
-  background: #f3cccc;
-  color: #8a2525;
+
+/* ========================================
+   LOGIN-KNAP
+======================================== */
+
+.registration-login-button {
+  background: var(--green);
+  color: white;
+
+  text-decoration: none;
+
+  transition: opacity 160ms ease;
 }
 
-.spots-badge {
-  background: #dff3cc;
-  border-radius: 999px;
-  display: inline-block;
-  font-weight: 700;
-  padding: 0.65rem 1rem;
-  text-align: center;
-  width: fit-content;
+.registration-login-button:hover {
+  opacity: 0.88;
 }
 
-@media (max-width: 900px) {
-  .registration-row {
-    grid-template-columns: 1fr 1fr;
-  }
 
-  .registration-labels {
-    display: none;
-  }
+/* ========================================
+   UDSOLGT
+======================================== */
+
+.sold-out-button {
+  background: #f4cccc;
+  color: #922c2c;
+
+  cursor: default;
+}
+
+
+/* ========================================
+   FOCUS
+======================================== */
+
+.registration-button:focus-visible,
+.registration-login-button:focus-visible,
+.registration-event-link:focus-visible {
+  outline: 3px solid var(--lime);
+  outline-offset: 3px;
+}
+
+
+/* ========================================
+   SE EVENT
+======================================== */
+
+.event-link-column {
+  display: flex;
+
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .registration-event-link {
   color: var(--green);
-  font-weight: 700;
+
+  font-size: 0.92rem;
+  font-weight: 750;
+
   text-decoration: underline;
+  text-decoration-thickness: 1.5px;
   text-underline-offset: 4px;
+
+  white-space: nowrap;
+
+  transition: opacity 160ms ease;
 }
 
 .registration-event-link:hover {
-  opacity: 0.65;
+  opacity: 0.6;
 }
 
-.event-link-column {
-  display: flex;
-  align-items: center;
+
+/* ========================================
+   FEJL
+======================================== */
+
+.form-error {
+  width: 100%;
+
+  background: #f4cccc;
+  color: #922c2c;
+
+  border-radius: 12px;
+
+  margin: 0 0 2rem;
+  padding: 1rem 1.2rem;
+
+  box-sizing: border-box;
+}
+
+
+/* ========================================
+   TABLET
+======================================== */
+
+@media (max-width: 1050px) {
+  .registration-row {
+    grid-template-columns:
+      1.6fr
+      1fr
+      0.85fr
+      1fr
+      0.95fr
+      0.75fr;
+
+    column-gap: 0.8rem;
+
+    padding-left: 1.3rem;
+    padding-right: 1.3rem;
+  }
+
+  .registration-row strong,
+  .registration-row > span,
+  .registration-event-link {
+    font-size: 0.88rem;
+  }
+
+  .registration-button,
+  .registered-badge,
+  .registration-login-button,
+  .sold-out-button,
+  .spots-badge {
+    min-width: auto;
+
+    font-size: 0.85rem;
+
+    padding-left: 0.8rem;
+    padding-right: 0.8rem;
+  }
+}
+
+
+/* ========================================
+   MOBIL
+======================================== */
+
+@media (max-width: 760px) {
+  .admin-header {
+    padding-top: 2.5rem;
+    padding-bottom: 1rem;
+  }
+
+  .admin-header h1 {
+    font-size: clamp(2.8rem, 13vw, 4.5rem);
+  }
+
+  .registrations-page {
+    min-height: 70vh;
+
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+  }
+
+  /* Fjern tabeloverskrifter */
+  .registration-labels {
+    display: none;
+  }
+
+  /* Hvert event bliver et kort */
+  .registration-list {
+    display: grid;
+
+    gap: 1rem;
+
+    background: transparent;
+
+    border: none;
+    border-radius: 0;
+
+    box-shadow: none;
+
+    overflow: visible;
+  }
+
+  .registration-row {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 1.2rem;
+
+    min-height: 0;
+
+    background: white;
+
+    border: 1px solid rgba(20, 60, 48, 0.14);
+    border-radius: 18px;
+
+    padding: 1.4rem;
+
+    box-shadow: 0 8px 25px rgba(18, 52, 43, 0.05);
+  }
+
+  .registration-row:last-child {
+    border-bottom: 1px solid rgba(20, 60, 48, 0.14);
+  }
+
+  /* Eventnavnet går over begge kolonner */
+  .registration-row strong {
+    grid-column: 1 / -1;
+
+    font-size: 1.1rem;
+  }
+
+  .registration-row > span {
+    font-size: 0.95rem;
+  }
+
+  .registration-action,
+  .event-link-column {
+    align-items: center;
+  }
+
+  .spots-badge,
+  .registration-button,
+  .registered-badge,
+  .registration-login-button,
+  .sold-out-button {
+    min-width: 0;
+
+    width: fit-content;
+  }
+}
+
+
+/* ========================================
+   MEGET SMÅ SKÆRME
+======================================== */
+
+@media (max-width: 480px) {
+  .registration-row {
+    grid-template-columns: 1fr;
+  }
+
+  .registration-row strong {
+    grid-column: auto;
+  }
+
+  .spots-badge,
+  .registration-button,
+  .registered-badge,
+  .registration-login-button,
+  .sold-out-button {
+    width: fit-content;
+  }
 }

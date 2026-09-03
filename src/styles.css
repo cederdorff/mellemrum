@@ -100,5 +100,13 @@ select {
   place-items: center;
 }
 
+.page-content {
+  min-height: calc(100vh - 80px);
+}
 
+.page-loading {
+  min-height: calc(100vh - 80px);
+  display: grid;
+  place-items: center;
+}
 

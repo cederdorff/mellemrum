@@ -27,69 +27,74 @@ export default function App() {
 
       <Navbar />
 
-      <Suspense
-        fallback={
-          <main className="page-loading">
-            <p>Indlæser...</p>
-          </main>
-        }
-      >
-        <Routes>
-          {/* FORSIDE */}
-          <Route path="/" element={<HomePage />} />
+      <div className="page-content">
+        <Suspense
+          fallback={
+            <div className="page-loading">
+              <p>Indlæser...</p>
+            </div>
+          }
+        >
+          <Routes>
+            {/* FORSIDE */}
+            <Route path="/" element={<HomePage />} />
 
-          {/* OM MELLEMRUM */}
-          <Route path="/om" element={<AboutPage />} />
+            {/* OM MELLEMRUM */}
+            <Route path="/om" element={<AboutPage />} />
 
-          {/* ENKELT EVENT */}
-          <Route path="/events/:eventId" element={<EventPage />} />
+            {/* ENKELT EVENT */}
+            <Route path="/events/:eventId" element={<EventPage />} />
 
-          {/* TILMELDINGSOVERBLIK */}
-          <Route path="/tilmeldinger" element={<RegistrationsPage />} />
+            {/* TILMELDINGSOVERBLIK */}
+            <Route path="/tilmeldinger" element={<RegistrationsPage />} />
 
-          {/* LOGIN */}
-          <Route path="/login" element={<LoginPage />} />
+            {/* LOGIN */}
+            <Route path="/login" element={<LoginPage />} />
 
-          {/* GLEMT ADGANGSKODE */}
-          <Route path="/glemt-adgangskode" element={<ForgotPasswordPage />} />
+            {/* GLEMT ADGANGSKODE */}
+            <Route path="/glemt-adgangskode" element={<ForgotPasswordPage />} />
 
-          {/* NY ADGANGSKODE */}
-          <Route path="/nulstil-adgangskode" element={<ResetPasswordPage />} />
+            {/* NY ADGANGSKODE */}
+            <Route
+              path="/nulstil-adgangskode"
+              element={<ResetPasswordPage />}
+            />
 
-          {/* PROFIL - KRÆVER LOGIN */}
-          <Route
-            path="/profil"
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            }
-          />
+            {/* PROFIL - KRÆVER LOGIN */}
+            <Route
+              path="/profil"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
 
-          {/* OPRET EVENT - KRÆVER LOGIN */}
-          <Route
-            path="/opret-event"
-            element={
-              <ProtectedRoute>
-                <CreateEventPage />
-              </ProtectedRoute>
-            }
-          />
+            {/* OPRET EVENT - KRÆVER LOGIN */}
+            <Route
+              path="/opret-event"
+              element={
+                <ProtectedRoute>
+                  <CreateEventPage />
+                </ProtectedRoute>
+              }
+            />
 
-          {/* REDIGER EVENT - KRÆVER LOGIN */}
-          <Route
-            path="/events/:eventId/rediger"
-            element={
-              <ProtectedRoute>
-                <EditEventPage />
-              </ProtectedRoute>
-            }
-          />
+            {/* REDIGER EVENT - KRÆVER LOGIN */}
+            <Route
+              path="/events/:eventId/rediger"
+              element={
+                <ProtectedRoute>
+                  <EditEventPage />
+                </ProtectedRoute>
+              }
+            />
 
-          {/* 404 */}
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </Suspense>
+            {/* 404 */}
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </Suspense>
+      </div>
 
       <Footer />
     </>
