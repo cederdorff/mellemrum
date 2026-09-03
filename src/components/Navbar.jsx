@@ -1,14 +1,34 @@
-import { NavLink } from "react-router";
+import { Link } from "react-router";
+import { useAuth } from "../context/AuthContext";
+import "./Navbar.css";
 
 export default function Navbar() {
+  const { user, signOut } = useAuth();
+
   return (
     <nav className="site-nav">
-      <NavLink className="brand" to="/">
+      <Link to="/" className="brand">
         mellemrum<span>.</span>
-      </NavLink>
+      </Link>
+
       <div className="nav-links">
-        <NavLink to="/">Events</NavLink>
-        <NavLink to="/om">Om Mellemrum</NavLink>
+        <Link to="/tilmeldinger">Tilmeldinger</Link>
+
+        <Link to="/om">Om Mellemrum</Link>
+
+        {user ? (
+          <>
+            <Link to="/opret-event">Opret event</Link>
+
+            <Link to="/profil">Profil</Link>
+
+            <button className="logout-button" onClick={signOut}>
+              Log ud
+            </button>
+          </>
+        ) : (
+          <Link to="/login">Log ind</Link>
+        )}
       </div>
     </nav>
   );
